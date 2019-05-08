@@ -5,6 +5,7 @@ const passport = require('passport')
 //Load Models
 const Profile = require('../../models/Profile')
 const validateProfileInput = require('../../validation/profile')
+const validateExperienceInput = require('../../validation/experience')
 
 //@Route GET  api/profile/test
 //@description test profile request
@@ -93,7 +94,57 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
 
 })
 
+//@Route Post  api/profile/experience
+//@description add experience to profile
+//@access Private
 
+router.post('/experience', passport.authenticate('jwt', { session: false }), (req, res) => {
+    const { errors, isValid } = validateExperienceInput(req.body)
+
+    if (!isValid) {
+        res.status(400).json(errors)
+    }
+
+    Profile.findOne({ user: req.user.id }).then(profile => {
+
+        const newExperience = {
+            title: req.body.title,
+            company: req.body.company,
+            location: req.body.location,
+            from: req.body.from,
+            to: req.body.to,
+            current: req.body.current,
+            description: req.body.description
+        }
+        //add to experience to experience array
+        profile.experience.unshift(newExperience)
+        profile.save().then(profile => res.json(profile))
+    }).catch(err => res.status(400).json(err))
+})
+
+router.post('/education', passport.authenticate('jwt', { session: false }), (req, res) => {
+    const { errors, isValid } = validateEducationInput(req.body)
+
+    if (!isValid) {
+        res.status(400).json(errors)
+    }
+    Profile.findOne({ user: req.user.id }).then(profile => {
+        const newEducation = {
+            school: req.body.school,
+            fieldofstudy: req.bidy.fieldofstudy,
+            degree: req.body.degree,
+            location: req.body.location,
+            from: req.body.from,
+            to: req.body.to,
+            current: req.body.current
+        }
+
+        profile.education.unshift(newEducation)
+        Profile.save().then(profile => {
+            res.json(profile)
+        }).catch(err => res.status(400).json(err))
+    })
+})
 
 
 module.exports = router
