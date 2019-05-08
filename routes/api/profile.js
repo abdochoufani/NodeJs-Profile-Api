@@ -6,6 +6,7 @@ const passport = require('passport')
 const Profile = require('../../models/Profile')
 const validateProfileInput = require('../../validation/profile')
 const validateExperienceInput = require('../../validation/experience')
+const validateEducationInput = require('../../validation/education')
 
 //@Route GET  api/profile/test
 //@description test profile request
@@ -122,6 +123,11 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), (re
     }).catch(err => res.status(400).json(err))
 })
 
+
+//@Route Post  api/profile/education
+//@description add education to profile
+//@access Private
+
 router.post('/education', passport.authenticate('jwt', { session: false }), (req, res) => {
     const { errors, isValid } = validateEducationInput(req.body)
 
@@ -131,7 +137,7 @@ router.post('/education', passport.authenticate('jwt', { session: false }), (req
     Profile.findOne({ user: req.user.id }).then(profile => {
         const newEducation = {
             school: req.body.school,
-            fieldofstudy: req.bidy.fieldofstudy,
+            fieldofstudy: req.body.fieldofstudy,
             degree: req.body.degree,
             location: req.body.location,
             from: req.body.from,
@@ -140,9 +146,28 @@ router.post('/education', passport.authenticate('jwt', { session: false }), (req
         }
 
         profile.education.unshift(newEducation)
-        Profile.save().then(profile => {
+        profile.save().then(profile => {
             res.json(profile)
         }).catch(err => res.status(400).json(err))
+    })
+})
+
+
+//@Route Delete  api/profile/experience/:id
+//@description delete experience from profile
+//@access Private
+
+router.delete('/experience/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+
+        //get index of item to remove
+        const removeItem = profile.experience.map(item => item.id).indexOf(req.params.exp_id)
+
+        //splice out item from array
+        profile.experience.splice(removeItem, 1)
+        //save
+        profile.save().then(profile => res.json(profile))
+            .catch(err => res.status(404).json(err))
     })
 })
 
