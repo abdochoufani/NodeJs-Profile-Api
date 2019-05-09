@@ -4,6 +4,7 @@ const passport = require('passport')
 
 //Load Models
 const Profile = require('../../models/Profile')
+const User = require('../../models/User')
 const validateProfileInput = require('../../validation/profile')
 const validateExperienceInput = require('../../validation/experience')
 const validateEducationInput = require('../../validation/education')
@@ -157,7 +158,7 @@ router.post('/education', passport.authenticate('jwt', { session: false }), (req
 //@description delete experience from profile
 //@access Private
 
-router.delete('/experience/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.delete('/experience/:exp_id', passport.authenticate('jwt', { session: false }), (req, res) => {
     Profile.findOne({ user: req.user.id }).then(profile => {
 
         //get index of item to remove
@@ -168,6 +169,36 @@ router.delete('/experience/:id', passport.authenticate('jwt', { session: false }
         //save
         profile.save().then(profile => res.json(profile))
             .catch(err => res.status(404).json(err))
+    })
+})
+
+//@Route Delete  api/profile/education/:id
+//@description delete education from profile
+//@access Private
+
+router.delete('/education/:edu_id', passport.authenticate('jwt', { session: false }), (req, res) => {
+    Profile.findOne({ user: req.user.id }).then(profile => {
+
+        //get index of item to remove
+        const removeItem = profile.education.map(item => item.id).indexOf(req.params.edu_id)
+
+        //splice out item from array
+        profile.education.splice(removeItem, 1)
+        //save
+        profile.save().then(profile => res.json(profile))
+            .catch(err => res.status(404).json(err))
+    })
+})
+
+//@Route Delete  api/profile
+//@description delete user and profile from profile
+//@access Private
+
+router.delete('/', passport.authenticate('jwt', { session: false }), (req, res) => {
+    Profile.findOneAndRemove({ user: req.user.id }).then(() => {
+        User.findOneAndRemove({ _id: req.user.id }).then(() =>
+            res.json({ msg: 'User deleted' })
+        )
     })
 })
 

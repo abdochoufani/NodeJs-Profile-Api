@@ -1,5 +1,8 @@
 const router = require('express').Router()
 
+//Load Models
+const Profile = require('../../models/Profile')
+const User = require('../../models/User')
 
 
 //@Route GET  api/posts/test
