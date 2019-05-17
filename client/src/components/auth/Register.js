@@ -1,19 +1,42 @@
 import React, { Component } from 'react'
+import axios from 'axios'
+import classnames from 'classnames'
 
 export default class Register extends Component {
-
+    constructor() {
+        super()
+        this.state = {
+            name: '',
+            email: '',
+            password: '',
+            password2: '',
+            errors: {}
+        }
+    }
 
 
     handleSubmit = (event) => {
         event.preventDefault()
+        const newUser = {
+            name: this.state.name,
+            email: this.state.email,
+            password: this.state.password,
+            password2: this.state.password2
+        }
 
+        axios.post('api/users/register', newUser)
+            .then(user => console.log(user.data))
+            .catch(err => this.setState({ errors: err.response.data }))
     }
 
-    handleChange = () => {
-
+    handleChange = (event) => {
+        const { name, value } = event.target;
+        this.setState({ [name]: value });
     }
 
     render() {
+        const { errors } = this.state
+
         return (
             <div className="register">
                 <div className="container">
@@ -21,19 +44,57 @@ export default class Register extends Component {
                         <div className="col-md-8 m-auto">
                             <h1 className="display-4 text-center">Sign Up</h1>
                             <p className="lead text-center">Create your DevConnector account</p>
-                            <form onSubmit={this.handleSubmit}>
+                            <form noValidate onSubmit={this.handleSubmit}>
                                 <div className="form-group">
-                                    <input onChange={() => this.handleChange} type="text" className="form-control form-control-lg" placeholder="Name" name="name" required />
+                                    <input onChange={(e) => this.handleChange(e)} type="text" className={classnames("form-control form-control-lg", {
+                                        'is-invalid': errors.name
+                                    })}
+                                        placeholder="Name"
+                                        name="name"
+                                        value={this.state.name} />
+                                    {errors.name && (
+                                        <div className="invalid-feedback">
+                                            {errors.name}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <input onChange={() => this.handleChange} type="email" className="form-control form-control-lg" placeholder="Email Address" name="email" />
+                                    <input onChange={(e) => this.handleChange(e)} type="email" className={classnames("form-control form-control-lg", {
+                                        'is-invalid': errors.email
+                                    })}
+                                        placeholder="Email Address"
+                                        value={this.state.email}
+                                        name="email" />
+                                    {errors.email && (
+                                        <div className="invalid-feedback">
+                                            {errors.email}
+                                        </div>
+                                    )}
+
                                     <small className="form-text text-muted">This site uses Gravatar so if you want a profile image, use a Gravatar email</small>
                                 </div>
                                 <div className="form-group">
-                                    <input onChange={() => this.handleChange} type="password" className="form-control form-control-lg" placeholder="Password" name="password" />
+                                    <input onChange={(e) => this.handleChange(e)} type="password" className={classnames("form-control form-control-lg", {
+                                        'is-invalid': errors.password
+                                    })} placeholder="Password" name="password" value={this.state.password} />
+                                    {errors.password && (
+                                        <div className="invalid-feedback">
+                                            {errors.password}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="form-group">
-                                    <input onChange={() => this.handleChange} type="password" className="form-control form-control-lg" placeholder="Confirm Password" name="password2" />
+                                    <input onChange={(e) => this.handleChange(e)} type="password" className={classnames("form-control form-control-lg", {
+                                        'is-invalid': errors.password2
+                                    })}
+                                        placeholder="Confirm Password"
+                                        name="password2"
+                                        value={this.state.password2} />
+                                    {errors.password2 && (
+                                        <div className="invalid-feedback">
+                                            {errors.password2}
+                                        </div>
+                                    )}
                                 </div>
                                 <input type="submit" className="btn btn-info btn-block mt-4" />
                             </form>
