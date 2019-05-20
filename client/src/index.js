@@ -7,7 +7,26 @@ import * as serviceWorker from './serviceWorker';
 import { Provider } from 'react-redux'
 import store from './store'
 
+import jwt_decode from 'jwt-decode'
+import setAuthToken from './utils/setAuthToken'
+import { setCurrentUser, logoutUser } from './actions/authActions'
 
+
+if (localStorage.jwtToken) {
+    setAuthToken(localStorage.jwtToken)
+    //decode token 
+    const decoded = jwt_decode(localStorage.jwtToken)
+    store.dispatch(setCurrentUser(decoded))
+    //check for expired tokens
+    const setCurrentTime = Date.now() / 1000
+    if (decoded.exp < setCurrentTime) {
+        // logout user
+        store.dispatch(logoutUser())
+        //clear current profile
+        // redirect to login
+        window.location.href = '/login'
+    }
+}
 
 
 ReactDOM.render(
